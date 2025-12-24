@@ -10,6 +10,7 @@ import Farming from "./pages/Farming";
 import Student from "./pages/Student";
 import LearningHub from "./pages/LearningHub";
 import Auth from "./pages/Auth";
+import Reply from "./pages/Reply";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/farming" element={<Farming />} />
             <Route path="/student" element={<Student />} />
             <Route path="/learning-hub" element={<LearningHub />} />
+            <Route path="/reply" element={<Reply />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
