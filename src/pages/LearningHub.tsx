@@ -14,6 +14,8 @@ const LearningHub = () => {
   
   const overallProgress = getOverallProgress();
   const bankingTopics = getTopicsByModuleSlug('banking-basics');
+  const farmingTopics = getTopicsByModuleSlug('farming');
+  const studentTopics = getTopicsByModuleSlug('student');
 
   const achievements = [
     { name: "Banking Beginner", icon: "🏦", unlocked: modules.find(m => m.slug === 'banking-basics')?.completedCount ?? 0 >= 1 },
@@ -89,13 +91,11 @@ const LearningHub = () => {
               {/* Learning Modules */}
               <div>
                 <h2 className="text-2xl font-bold mb-6">Your Learning Modules</h2>
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-3 gap-6">
                   {loading ? (
                     <p className="text-muted-foreground">Loading modules...</p>
                   ) : (
-                    modules
-                      .filter((module) => module.category === 'banking')
-                      .map((module) => (
+                    modules.map((module) => (
                       <Card
                         key={module.id}
                         className={`p-6 hover:shadow-lg transition-all ${
@@ -130,13 +130,84 @@ const LearningHub = () => {
                 </div>
               </div>
 
-              {/* Topic Details */}
+              {/* Topic Details - Banking */}
               <Card className="p-6">
-                <h3 className="text-xl font-bold mb-4">
-                  Banking Basics ({bankingTopics.filter(t => isTopicCompleted(t.id)).length} of {bankingTopics.length} Topics)
-                </h3>
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-2xl">🏦</span>
+                  <h3 className="text-xl font-bold">
+                    Banking Basics ({bankingTopics.filter(t => isTopicCompleted(t.id)).length} of {bankingTopics.length} Topics)
+                  </h3>
+                </div>
                 <div className="space-y-3">
                   {bankingTopics.map((topic) => {
+                    const completed = isTopicCompleted(topic.id);
+                    return (
+                      <div
+                        key={topic.id}
+                        className="flex items-center gap-3 p-3 rounded-lg bg-muted"
+                      >
+                        <div
+                          className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                            completed
+                              ? "bg-secondary text-white"
+                              : "bg-muted-foreground/20"
+                          }`}
+                        >
+                          {completed ? "✓" : "○"}
+                        </div>
+                        <span className={completed ? "text-foreground" : "text-muted-foreground"}>
+                          {topic.title}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+
+              {/* Topic Details - Farming */}
+              <Card className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-2xl">🌾</span>
+                  <h3 className="text-xl font-bold">
+                    Farming Knowledge ({farmingTopics.filter(t => isTopicCompleted(t.id)).length} of {farmingTopics.length} Topics)
+                  </h3>
+                </div>
+                <div className="space-y-3">
+                  {farmingTopics.map((topic) => {
+                    const completed = isTopicCompleted(topic.id);
+                    return (
+                      <div
+                        key={topic.id}
+                        className="flex items-center gap-3 p-3 rounded-lg bg-muted"
+                      >
+                        <div
+                          className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                            completed
+                              ? "bg-secondary text-white"
+                              : "bg-muted-foreground/20"
+                          }`}
+                        >
+                          {completed ? "✓" : "○"}
+                        </div>
+                        <span className={completed ? "text-foreground" : "text-muted-foreground"}>
+                          {topic.title}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+
+              {/* Topic Details - Student */}
+              <Card className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-2xl">🎓</span>
+                  <h3 className="text-xl font-bold">
+                    Student Resources ({studentTopics.filter(t => isTopicCompleted(t.id)).length} of {studentTopics.length} Topics)
+                  </h3>
+                </div>
+                <div className="space-y-3">
+                  {studentTopics.map((topic) => {
                     const completed = isTopicCompleted(topic.id);
                     return (
                       <div
