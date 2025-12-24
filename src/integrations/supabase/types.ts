@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      learning_modules: {
+        Row: {
+          category: string
+          created_at: string
+          icon: string
+          id: string
+          slug: string
+          title: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          icon: string
+          id?: string
+          slug: string
+          title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          slug?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      learning_topics: {
+        Row: {
+          created_at: string
+          duration: string | null
+          id: string
+          module_id: string
+          slug: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          duration?: string | null
+          id?: string
+          module_id: string
+          slug: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          duration?: string | null
+          id?: string
+          module_id?: string
+          slug?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_topics_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "learning_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -43,6 +108,44 @@ export type Database = {
           user_type?: string | null
         }
         Relationships: []
+      }
+      user_learning_progress: {
+        Row: {
+          completed: boolean
+          created_at: string
+          id: string
+          listened_at: string | null
+          topic_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          listened_at?: string | null
+          topic_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          listened_at?: string | null
+          topic_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_learning_progress_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "learning_topics"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

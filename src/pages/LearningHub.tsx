@@ -5,45 +5,31 @@ import { Progress } from "@/components/ui/progress";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
+import { useLearningProgress } from "@/hooks/useLearningProgress";
+import { useAuth } from "@/hooks/useAuth";
 
 const LearningHub = () => {
-  const modules = [
-    {
-      title: "Banking Basics",
-      progress: 67,
-      completed: "4 of 6 Topics Learned",
-      icon: "🏦",
-      locked: false,
-    },
-    {
-      title: "Farming Finances",
-      progress: 100,
-      completed: "Completed!",
-      icon: "🚜",
-      locked: false,
-    },
-    {
-      title: "Household Budgeting",
-      progress: 14,
-      completed: "1 of 7 Topics Learned",
-      icon: "🏠",
-      locked: false,
-    },
-    {
-      title: "Student Finances",
-      progress: 0,
-      completed: "0 of 4 Topics Learned",
-      icon: "🎓",
-      locked: false,
-    },
-  ];
+  const { user } = useAuth();
+  const { modules, loading, getOverallProgress, isTopicCompleted, getTopicsByModuleSlug } = useLearningProgress();
+  
+  const overallProgress = getOverallProgress();
+  const bankingTopics = getTopicsByModuleSlug('banking-basics');
 
   const achievements = [
-    { name: "Banking Beginner", icon: "🏦", unlocked: true },
-    { name: "Farming Finance Pro", icon: "🌾", unlocked: true },
-    { name: "Budgeting Master", icon: "💰", unlocked: false },
-    { name: "Savings Star", icon: "⭐", unlocked: false },
+    { name: "Banking Beginner", icon: "🏦", unlocked: modules.find(m => m.slug === 'banking-basics')?.completedCount ?? 0 >= 1 },
+    { name: "Farming Finance Pro", icon: "🌾", unlocked: modules.find(m => m.slug === 'farming-finances')?.progress === 100 },
+    { name: "Budgeting Master", icon: "💰", unlocked: modules.find(m => m.slug === 'household-budgeting')?.progress === 100 },
+    { name: "Savings Star", icon: "⭐", unlocked: overallProgress >= 75 },
   ];
+
+  const getModuleLink = (category: string) => {
+    switch (category) {
+      case 'banking': return '/banking';
+      case 'farming': return '/farming';
+      case 'student': return '/student';
+      default: return '/';
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -69,6 +55,14 @@ const LearningHub = () => {
         </section>
 
         <div className="container mx-auto px-4 py-8 max-w-6xl">
+          {!user && (
+            <Card className="p-4 mb-6 bg-accent/10 border-accent">
+              <p className="text-sm text-muted-foreground">
+                <Link to="/auth" className="text-accent font-medium hover:underline">Login</Link> to track your personal learning progress!
+              </p>
+            </Card>
+          )}
+
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
@@ -77,14 +71,18 @@ const LearningHub = () => {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h2 className="text-2xl font-bold">Overall Progress</h2>
-                    <p className="text-muted-foreground">You've completed 65% of your financial training!</p>
+                    <p className="text-muted-foreground">
+                      {loading ? 'Loading...' : `You've completed ${overallProgress}% of your financial training!`}
+                    </p>
                   </div>
-                  <Button className="gap-2 bg-secondary text-white">
-                    <Volume2 className="w-4 h-4" />
-                    Continue Learning
-                  </Button>
+                  <Link to="/banking">
+                    <Button className="gap-2 bg-secondary text-white">
+                      <Volume2 className="w-4 h-4" />
+                      Continue Learning
+                    </Button>
+                  </Link>
                 </div>
-                <Progress value={65} className="h-3 mb-2" />
+                <Progress value={overallProgress} className="h-3 mb-2" />
                 <p className="text-sm text-muted-foreground">Keep going! You're doing great!</p>
               </Card>
 
@@ -92,64 +90,72 @@ const LearningHub = () => {
               <div>
                 <h2 className="text-2xl font-bold mb-6">Your Learning Modules</h2>
                 <div className="grid md:grid-cols-2 gap-6">
-                  {modules.map((module, index) => (
-                    <Card
-                      key={index}
-                      className={`p-6 hover:shadow-lg transition-all ${
-                        module.progress === 100 ? "bg-secondary/10 border-secondary" : ""
-                      }`}
-                    >
-                      <div className="flex items-start gap-4 mb-4">
-                        <div className="text-4xl">{module.icon}</div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-bold mb-1">{module.title}</h3>
-                          <p className="text-sm text-muted-foreground">{module.completed}</p>
-                        </div>
-                        {module.progress === 100 && (
-                          <div className="bg-secondary text-white text-xs px-2 py-1 rounded-full">
-                            ✓ Done
+                  {loading ? (
+                    <p className="text-muted-foreground">Loading modules...</p>
+                  ) : (
+                    modules.map((module) => (
+                      <Card
+                        key={module.id}
+                        className={`p-6 hover:shadow-lg transition-all ${
+                          module.progress === 100 ? "bg-secondary/10 border-secondary" : ""
+                        }`}
+                      >
+                        <div className="flex items-start gap-4 mb-4">
+                          <div className="text-4xl">{module.icon}</div>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold mb-1">{module.title}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {module.progress === 100 
+                                ? 'Completed!' 
+                                : `${module.completedCount} of ${module.totalCount} Topics Learned`}
+                            </p>
                           </div>
-                        )}
-                      </div>
-                      <Progress value={module.progress} className="mb-3" />
-                      <Button variant="outline" className="w-full" size="sm">
-                        {module.progress === 0 ? "Start Module" : "Continue"}
-                      </Button>
-                    </Card>
-                  ))}
+                          {module.progress === 100 && (
+                            <div className="bg-secondary text-white text-xs px-2 py-1 rounded-full">
+                              ✓ Done
+                            </div>
+                          )}
+                        </div>
+                        <Progress value={module.progress} className="mb-3" />
+                        <Link to={getModuleLink(module.category)}>
+                          <Button variant="outline" className="w-full" size="sm">
+                            {module.progress === 0 ? "Start Module" : "Continue"}
+                          </Button>
+                        </Link>
+                      </Card>
+                    ))
+                  )}
                 </div>
               </div>
 
               {/* Topic Details */}
               <Card className="p-6">
-                <h3 className="text-xl font-bold mb-4">Banking Basics (4 of 6 Topics)</h3>
+                <h3 className="text-xl font-bold mb-4">
+                  Banking Basics ({bankingTopics.filter(t => isTopicCompleted(t.id)).length} of {bankingTopics.length} Topics)
+                </h3>
                 <div className="space-y-3">
-                  {[
-                    { title: "Understanding Bank Accounts", completed: true },
-                    { title: "How to Use an ATM", completed: true },
-                    { title: "Introduction to Savings", completed: true },
-                    { title: "Digital Banking Safety", completed: true },
-                    { title: "Understanding Loans", completed: false },
-                    { title: "Building Credit", completed: false },
-                  ].map((topic, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-3 p-3 rounded-lg bg-muted"
-                    >
+                  {bankingTopics.map((topic) => {
+                    const completed = isTopicCompleted(topic.id);
+                    return (
                       <div
-                        className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                          topic.completed
-                            ? "bg-secondary text-white"
-                            : "bg-muted-foreground/20"
-                        }`}
+                        key={topic.id}
+                        className="flex items-center gap-3 p-3 rounded-lg bg-muted"
                       >
-                        {topic.completed ? "✓" : "○"}
+                        <div
+                          className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                            completed
+                              ? "bg-secondary text-white"
+                              : "bg-muted-foreground/20"
+                          }`}
+                        >
+                          {completed ? "✓" : "○"}
+                        </div>
+                        <span className={completed ? "text-foreground" : "text-muted-foreground"}>
+                          {topic.title}
+                        </span>
                       </div>
-                      <span className={topic.completed ? "text-foreground" : "text-muted-foreground"}>
-                        {topic.title}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </Card>
             </div>
