@@ -1,47 +1,72 @@
-import { Volume2, Home } from "lucide-react";
+import { Volume2, Home, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
+import { useLearningProgress } from "@/hooks/useLearningProgress";
+import { useAuth } from "@/hooks/useAuth";
 
 const Student = () => {
+  const { user } = useAuth();
+  const { getTopicsByModuleSlug, isTopicCompleted, markTopicAsListened, loading } = useLearningProgress();
+  
+  const topics = getTopicsByModuleSlug('student');
+
+  const handleListen = async (topicSlug: string) => {
+    const topic = topics.find(t => t.slug === topicSlug);
+    if (topic) {
+      await markTopicAsListened(topic.id);
+    }
+  };
+
+  const getTopicCompleted = (topicSlug: string) => {
+    const topic = topics.find(t => t.slug === topicSlug);
+    return topic ? isTopicCompleted(topic.id) : false;
+  };
+
   const modules = [
     {
       title: "Education Loans",
       description: "Learn about loans and repayment options.",
       icon: "🎓",
       color: "bg-primary",
+      topicSlug: "study-techniques",
     },
     {
       title: "Pocket Money Management",
       description: "Budgeting tips for managing your allowance.",
       icon: "💰",
       color: "bg-accent",
+      topicSlug: "time-management",
     },
     {
       title: "Digital Payments Basics",
       description: "How to use secure digital transactions.",
       icon: "📱",
       color: "bg-secondary",
+      topicSlug: "exam-preparation",
     },
     {
       title: "Scholarship Awareness",
       description: "Find and apply for available scholarships.",
       icon: "⭐",
       color: "bg-secondary",
+      topicSlug: "note-taking",
     },
     {
       title: "Online Scams",
       description: "Identify and avoid financial fraud online.",
       icon: "🛡️",
       color: "bg-terracotta",
+      topicSlug: "career-guidance",
     },
     {
       title: "Importance of Saving",
       description: "Build a secure future through savings.",
       icon: "🐷",
       color: "bg-primary",
+      topicSlug: null,
     },
   ];
 
@@ -82,6 +107,16 @@ const Student = () => {
           </div>
         </section>
 
+        {!user && (
+          <div className="container mx-auto px-4 py-4 max-w-6xl">
+            <div className="bg-muted p-4 rounded-lg text-center">
+              <p className="text-muted-foreground">
+                <Link to="/auth" className="text-primary underline">Login</Link> to track your learning progress
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Learning Modules */}
         <section className="py-16 px-4">
           <div className="container mx-auto max-w-6xl">
@@ -101,9 +136,17 @@ const Student = () => {
                   <Button
                     variant="secondary"
                     className="w-full gap-2"
+                    onClick={() => module.topicSlug && handleListen(module.topicSlug)}
+                    disabled={loading || !module.topicSlug}
                   >
-                    <Volume2 className="w-4 h-4" />
-                    Start Learning
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : module.topicSlug && getTopicCompleted(module.topicSlug) ? (
+                      <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <Volume2 className="w-4 h-4" />
+                    )}
+                    {module.topicSlug && getTopicCompleted(module.topicSlug) ? 'Completed' : 'Start Learning'}
                   </Button>
                 </Card>
               ))}
