@@ -1,11 +1,30 @@
-import { Volume2, Home, TrendingUp, TrendingDown } from "lucide-react";
+import { Volume2, Home, TrendingUp, TrendingDown, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
+import { useLearningProgress } from "@/hooks/useLearningProgress";
+import { useAuth } from "@/hooks/useAuth";
 
 const Farming = () => {
+  const { user } = useAuth();
+  const { getTopicsByModuleSlug, isTopicCompleted, markTopicAsListened, loading } = useLearningProgress();
+  
+  const topics = getTopicsByModuleSlug('farming');
+
+  const handleListen = async (topicSlug: string) => {
+    const topic = topics.find(t => t.slug === topicSlug);
+    if (topic) {
+      await markTopicAsListened(topic.id);
+    }
+  };
+
+  const getTopicCompleted = (topicSlug: string) => {
+    const topic = topics.find(t => t.slug === topicSlug);
+    return topic ? isTopicCompleted(topic.id) : false;
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -31,6 +50,16 @@ const Farming = () => {
           </div>
         </section>
 
+        {!user && (
+          <div className="container mx-auto px-4 py-4">
+            <div className="bg-muted p-4 rounded-lg text-center">
+              <p className="text-muted-foreground">
+                <Link to="/auth" className="text-primary underline">Login</Link> to track your learning progress
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           <div className="grid lg:grid-cols-2 gap-6">
             {/* Kisan Credit Card */}
@@ -51,9 +80,20 @@ const Farming = () => {
                     <p className="text-lg font-bold">Your currents ₹3,00,000</p>
                   </div>
                 </div>
-                <Button variant="outline" className="gap-2">
-                  <Volume2 className="w-4 h-4" />
-                  Listen to KCC Advice
+                <Button 
+                  variant="outline" 
+                  className="gap-2"
+                  onClick={() => handleListen('crop-selection')}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : getTopicCompleted('crop-selection') ? (
+                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <Volume2 className="w-4 h-4" />
+                  )}
+                  {getTopicCompleted('crop-selection') ? 'Listened' : 'Listen to KCC Advice'}
                 </Button>
               </div>
             </Card>
@@ -79,9 +119,19 @@ const Farming = () => {
                     </div>
                   </div>
                 </div>
-                <Button className="gap-2 bg-accent text-white">
-                  <Volume2 className="w-4 h-4" />
-                  Listen to Financial Analysis
+                <Button 
+                  className="gap-2 bg-accent text-white"
+                  onClick={() => handleListen('soil-preparation')}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : getTopicCompleted('soil-preparation') ? (
+                    <CheckCircle2 className="w-4 h-4" />
+                  ) : (
+                    <Volume2 className="w-4 h-4" />
+                  )}
+                  {getTopicCompleted('soil-preparation') ? 'Listened' : 'Listen to Financial Analysis'}
                 </Button>
               </div>
             </Card>
@@ -98,9 +148,20 @@ const Farming = () => {
                 <div className="flex-1">
                   <p className="text-sm text-muted-foreground mb-2">Active Policy for Kharif 2024.</p>
                   <p className="text-sm text-muted-foreground mb-4">Claim status: In Progress.</p>
-                  <Button variant="outline" className="w-full gap-2">
-                    <Volume2 className="w-4 h-4" />
-                    Listen to Claim Process
+                  <Button 
+                    variant="outline" 
+                    className="w-full gap-2"
+                    onClick={() => handleListen('irrigation-methods')}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : getTopicCompleted('irrigation-methods') ? (
+                      <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <Volume2 className="w-4 h-4" />
+                    )}
+                    {getTopicCompleted('irrigation-methods') ? 'Listened' : 'Listen to Claim Process'}
                   </Button>
                 </div>
               </div>
@@ -134,9 +195,20 @@ const Farming = () => {
                     </div>
                   </div>
                 </div>
-                <Button variant="outline" className="gap-2 ml-4">
-                  <Volume2 className="w-4 h-4" />
-                  Listen to Market Trends
+                <Button 
+                  variant="outline" 
+                  className="gap-2 ml-4"
+                  onClick={() => handleListen('pest-control')}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : getTopicCompleted('pest-control') ? (
+                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <Volume2 className="w-4 h-4" />
+                  )}
+                  {getTopicCompleted('pest-control') ? 'Listened' : 'Listen to Market Trends'}
                 </Button>
               </div>
             </Card>
@@ -152,9 +224,19 @@ const Farming = () => {
                     <a href="#" className="block text-secondary underline">Solar Pump Subsidy application</a>
                   </div>
                 </div>
-                <Button className="gap-2 bg-terracotta text-white">
-                  <Volume2 className="w-4 h-4" />
-                  Listen to Scheme Eligibility
+                <Button 
+                  className="gap-2 bg-terracotta text-white"
+                  onClick={() => handleListen('harvest-techniques')}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : getTopicCompleted('harvest-techniques') ? (
+                    <CheckCircle2 className="w-4 h-4" />
+                  ) : (
+                    <Volume2 className="w-4 h-4" />
+                  )}
+                  {getTopicCompleted('harvest-techniques') ? 'Listened' : 'Listen to Scheme Eligibility'}
                 </Button>
               </div>
             </Card>
