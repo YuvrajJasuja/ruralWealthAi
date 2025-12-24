@@ -29,7 +29,7 @@ serve(async (req) => {
         messages: [
           { 
             role: "system", 
-            content: "You are a helpful assistant for GramSathi, an app that helps rural users with banking, farming, and student resources. Provide clear, simple answers in a friendly tone. Keep responses concise and easy to understand." 
+            content: "You are a helpful assistant for Rural Wealth, an app that helps rural users with banking, farming, and student resources. Provide clear, simple answers in a friendly tone. Keep responses concise and easy to understand." 
           },
           { role: "user", content: message },
         ],
