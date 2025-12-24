@@ -1,43 +1,27 @@
-import { Volume2, Home } from "lucide-react";
+import { Volume2, Home, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
+import { useLearningProgress } from "@/hooks/useLearningProgress";
+import { useAuth } from "@/hooks/useAuth";
 
 const Banking = () => {
-  const bankingModules = [
-    {
-      title: "How to open a bank account",
-      icon: "🏦",
-      duration: "5 min",
-      color: "bg-primary",
-    },
-    {
-      title: "How to use an ATM",
-      icon: "🏧",
-      duration: "4 min",
-      color: "bg-accent",
-    },
-    {
-      title: "How to deposit/withdraw money",
-      icon: "💰",
-      duration: "6 min",
-      color: "bg-secondary",
-    },
-    {
-      title: "Understanding fraud",
-      icon: "🛡️",
-      duration: "5 min",
-      color: "bg-terracotta",
-    },
-    {
-      title: "UPI with voice guidance",
-      icon: "📱",
-      duration: "Interactive",
-      color: "bg-primary",
-    },
-  ];
+  const { user } = useAuth();
+  const { getTopicsByModuleSlug, markTopicAsListened, isTopicCompleted, loading } = useLearningProgress();
+  
+  const topics = getTopicsByModuleSlug('banking-basics');
+
+  const getColorClass = (index: number) => {
+    const colors = ['bg-primary', 'bg-accent', 'bg-secondary', 'bg-terracotta', 'bg-primary'];
+    return colors[index % colors.length];
+  };
+
+  const handleListen = async (topicId: string) => {
+    await markTopicAsListened(topicId);
+    // Here you could also trigger actual audio playback
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -94,30 +78,87 @@ const Banking = () => {
               Learn Banking Step-by-Step
             </h2>
             
+            {!user && (
+              <Card className="p-4 mb-6 bg-accent/10 border-accent">
+                <p className="text-sm text-muted-foreground">
+                  <Link to="/auth" className="text-accent font-medium hover:underline">Login</Link> to track your learning progress!
+                </p>
+              </Card>
+            )}
+            
             <div className="grid md:grid-cols-2 gap-6">
-              {bankingModules.map((module, index) => (
-                <Card
-                  key={index}
-                  className={`${module.color} text-white p-6 hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer`}
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-4">
-                      <div className="text-5xl">{module.icon}</div>
-                      <div>
-                        <h3 className="text-xl font-bold mb-1">{module.title}</h3>
-                        <p className="text-white/90 text-sm">Duration: {module.duration}</p>
+              {loading ? (
+                <p className="text-muted-foreground">Loading modules...</p>
+              ) : topics.length > 0 ? (
+                topics.map((topic, index) => {
+                  const completed = isTopicCompleted(topic.id);
+                  return (
+                    <Card
+                      key={topic.id}
+                      className={`${getColorClass(index)} text-white p-6 hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer relative`}
+                    >
+                      {completed && (
+                        <div className="absolute top-3 right-3">
+                          <CheckCircle className="w-6 h-6 text-white" />
+                        </div>
+                      )}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-4">
+                          <div className="text-5xl">
+                            {index === 0 && '🏦'}
+                            {index === 1 && '🏧'}
+                            {index === 2 && '💰'}
+                            {index === 3 && '🛡️'}
+                            {index === 4 && '📱'}
+                            {index === 5 && '💳'}
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold mb-1">{topic.title}</h3>
+                            <p className="text-white/90 text-sm">Duration: {topic.duration || 'N/A'}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <Button
+                        variant="secondary"
+                        className="w-full gap-2 mt-4"
+                        onClick={() => handleListen(topic.id)}
+                        disabled={loading}
+                      >
+                        <Volume2 className="w-4 h-4" />
+                        {completed ? 'Listen Again' : `Listen in Hindi (${topic.duration || 'N/A'})`}
+                      </Button>
+                    </Card>
+                  );
+                })
+              ) : (
+                // Fallback static content
+                [
+                  { title: "How to open a bank account", icon: "🏦", duration: "5 min", color: "bg-primary" },
+                  { title: "How to use an ATM", icon: "🏧", duration: "4 min", color: "bg-accent" },
+                  { title: "How to deposit/withdraw money", icon: "💰", duration: "6 min", color: "bg-secondary" },
+                  { title: "Understanding fraud", icon: "🛡️", duration: "5 min", color: "bg-terracotta" },
+                  { title: "UPI with voice guidance", icon: "📱", duration: "Interactive", color: "bg-primary" },
+                ].map((module, index) => (
+                  <Card
+                    key={index}
+                    className={`${module.color} text-white p-6 hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer`}
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-4">
+                        <div className="text-5xl">{module.icon}</div>
+                        <div>
+                          <h3 className="text-xl font-bold mb-1">{module.title}</h3>
+                          <p className="text-white/90 text-sm">Duration: {module.duration}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <Button
-                    variant="secondary"
-                    className="w-full gap-2 mt-4"
-                  >
-                    <Volume2 className="w-4 h-4" />
-                    Listen in Hindi ({module.duration})
-                  </Button>
-                </Card>
-              ))}
+                    <Button variant="secondary" className="w-full gap-2 mt-4">
+                      <Volume2 className="w-4 h-4" />
+                      Listen in Hindi ({module.duration})
+                    </Button>
+                  </Card>
+                ))
+              )}
             </div>
 
             {/* Additional Info */}
@@ -139,13 +180,15 @@ const Banking = () => {
                 </p>
               </Card>
               
-              <Card className="p-6 text-center">
-                <div className="text-4xl mb-3">✅</div>
-                <h3 className="font-bold mb-2">Track Progress</h3>
-                <p className="text-sm text-muted-foreground">
-                  See what you've learned
-                </p>
-              </Card>
+              <Link to="/learning-hub">
+                <Card className="p-6 text-center hover:shadow-lg transition-all cursor-pointer">
+                  <div className="text-4xl mb-3">✅</div>
+                  <h3 className="font-bold mb-2">Track Progress</h3>
+                  <p className="text-sm text-muted-foreground">
+                    See what you've learned
+                  </p>
+                </Card>
+              </Link>
             </div>
           </div>
         </section>
