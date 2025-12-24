@@ -93,7 +93,9 @@ const LearningHub = () => {
                   {loading ? (
                     <p className="text-muted-foreground">Loading modules...</p>
                   ) : (
-                    modules.map((module) => (
+                    modules
+                      .filter((module) => module.category === 'banking')
+                      .map((module) => (
                       <Card
                         key={module.id}
                         className={`p-6 hover:shadow-lg transition-all ${
