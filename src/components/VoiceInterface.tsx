@@ -1,8 +1,20 @@
-import { Mic, Volume2 } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Mic, Volume2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const VoiceInterface = () => {
+  const [question, setQuestion] = useState("");
+  const navigate = useNavigate();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (question.trim()) {
+      navigate("/reply", { state: { question: question.trim() } });
+    }
+  };
+
   return (
     <section className="py-16 px-4 bg-muted">
       <div className="container mx-auto max-w-4xl">
@@ -64,12 +76,17 @@ const VoiceInterface = () => {
             </p>
           </div>
 
-          <div className="w-full max-w-2xl">
+          <form onSubmit={handleSubmit} className="w-full max-w-2xl flex gap-3">
             <Input
               placeholder="Type your question..."
-              className="h-14 text-lg bg-card shadow-sm"
+              className="h-14 text-lg bg-card shadow-sm flex-1"
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
             />
-          </div>
+            <Button type="submit" size="lg" className="h-14 px-6" disabled={!question.trim()}>
+              <Send className="w-5 h-5" />
+            </Button>
+          </form>
         </div>
       </div>
     </section>
