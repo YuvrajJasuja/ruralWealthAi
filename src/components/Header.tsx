@@ -1,9 +1,11 @@
-import { Home, User, HelpCircle, Volume2 } from "lucide-react";
+import { Home, User, LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Header = () => {
   const location = useLocation();
+  const { user, signOut } = useAuth();
   
   const isActive = (path: string) => location.pathname === path;
   
@@ -65,9 +67,32 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2 font-medium">
-              🌐 English (Local Support)
+            <Button variant="outline" className="gap-2 font-medium hidden sm:flex">
+              🌐 English
             </Button>
+            
+            {user ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground hidden md:block">
+                  {user.email?.split('@')[0]}
+                </span>
+                <Button 
+                  variant="outline" 
+                  className="gap-2 font-medium"
+                  onClick={() => signOut()}
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Logout</span>
+                </Button>
+              </div>
+            ) : (
+              <Link to="/auth">
+                <Button variant="default" className="gap-2 font-medium">
+                  <LogIn className="w-4 h-4" />
+                  <span className="hidden sm:inline">Login</span>
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>
